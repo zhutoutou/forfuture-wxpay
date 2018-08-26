@@ -1,5 +1,8 @@
-# ignore all files in the src/ directory
+# ignore all files in the */ directory
 src/
+node_modules/
 
-# ignore all .babelrc files
-*.babelrc
+# ignore single file
+.babelrc
+.gitignore
+npm-debug.log
