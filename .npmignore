@@ -1,0 +1,5 @@
+# ignore all files in the src/ directory
+src/
+
+# ignore all .babelrc files
+*.babelrc

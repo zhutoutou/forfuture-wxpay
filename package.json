@@ -1,0 +1,31 @@
+{
+  "name": "forfuture-wxpay",
+  "version": "1.0.1",
+  "description": "微信支付接口实现",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cleanLib": "./node_modules/.bin/rimraf lib",
+    "bableBuild": "./node_modules/.bin/babel src --out-dir lib",
+    "prepublish": "npm run cleanLib && npm run bableBuild"
+  },
+  "keywords": [
+    "JavaScript"
+  ],
+  "author": "zhuzhutou",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "debug": "^3.1.0",
+    "knex": "^0.15.2",
+    "md5": "^2.2.1",
+    "moment": "^2.22.2",
+    "uuid": "^3.3.2",
+    "xml": "^1.0.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "rimraf": "^2.6.2"
+  }
+}
