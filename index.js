@@ -34,8 +34,8 @@ module.exports = function init (options) {
     const { rootPathname , serverHost, mch} = options
     if ([rootPathname, serverHost,mch].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
-    const { mch_id, fee_type, sign_type } = mch
-    if ([mch_id, fee_type, sign_type].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
+    const { mch_id, fee_type, sign_key,orderUrl } = mch
+    if ([mch_id, fee_type,sign_key,orderUrl].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
     if (options.mysql) {
         const { host, port, user, db, pass } = options.mysql
