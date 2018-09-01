@@ -1,6 +1,6 @@
 const debug = require('debug')('wxpay-sdk[unified]')
 const http = require('axios')
-const moument = require('moument')
+const moment = require('moment')
 const {object2XML} = require('../helper/xml')
 const sign = require('../helper/sign')
 const OrderDbService = require('../mysql/OrderDbService')
@@ -13,7 +13,7 @@ const cdataproperties = [
 
 
 /*
-地址：https://api.mch.weixin.qq.com/pay/unifiedorder
+地址：http://www.pkfis.cn/wx/unified
 参数：
 body        String  商品描述
  * @param {String(128)}     [必填] body             商品描述
@@ -87,8 +87,8 @@ signType
 
             // 随机数
             const nonce_str = Math.floor(Math.random() * 10000000)
-            const time_start = moument().utcOffset(8).format('YYYYMMDDHHmmss')
-            const time_expire = moument().utcOffset(8).add(config.mch.mch_expire || 30, 'm').format('YYYYMMDDHHmmss')
+            const time_start = moment().utcOffset(8).format('YYYYMMDDHHmmss')
+            const time_expire = moment().utcOffset(8).add(config.mch.mch_expire || 30, 'm').format('YYYYMMDDHHmmss')
             
             // 构建统一下单参数
             const params = {
