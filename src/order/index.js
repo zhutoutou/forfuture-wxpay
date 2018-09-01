@@ -3,7 +3,7 @@ const http = require('axios')
 const moument = require('moument')
 const {object2XML} = require('../helper/xml')
 const sign = require('../helper/sign')
-const UnifiedDbService = require('../mysql/UnifiedDbService')
+const OrderDbService = require('../mysql/OrderDbService')
 const config = require('../../config')
 const {ERRORS} = require('../constants')
 
@@ -45,8 +45,10 @@ const cdataproperties = [
         try{
             const { device_info, body, detail, attach, total_fee, spbill_create_ip,
                 goods_tag, product_id, openid} = req.body
-            if([body, total_fee, spbill_create_ip].some(v=>v === undefined)) throw new Error(ERRORS.ERR_REQ_PARAM_MISSED)
-
+            if([body, total_fee, spbill_create_ip].every(v=>!v)) {
+                debug(ERRORS.ERR_REQ_PARAM_MISSED)
+                throw new Error(ERRORS.ERR_REQ_PARAM_MISSED)
+            }
             // 一些配置项
             const appid = config.appId
             const mch_id = config.mch.mch_id
@@ -86,7 +88,7 @@ const cdataproperties = [
                 openid
             }.sign(mch.sign_key,'sign')
             // 储存订单信息
-            const out_trade_no = UnifiedDbService.initOrderInfo(params)
+            const out_trade_no = OrderDbService.initOrderInfo(params)
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
@@ -99,12 +101,12 @@ const cdataproperties = [
             })
             res = res.data
             if (res.return_msg || res.return_code !== 'SUCCESS' || res.result_code !=='SUCCESS') {
-                debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, res.errmsg)
+                debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, res.err_code,res.err_code_des)
                 throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(res)}`)
             }
             debug('result_code: %s', res.prepay_id)
             // 存储统一下单信息
-            UnifiedDbService.unifiedOrderInfo(prepay_id,out_trade_no)
+            OrderDbService.unifiedOrderInfo(prepay_id,out_trade_no)
             // 构建返回值
             const result = {
                 appId,
@@ -116,6 +118,7 @@ const cdataproperties = [
             resolve(result.sign(mch.sign_key,'paySign'))
             
         } catch(e){
+            debug(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
             reject(new Error(`${Errors.ERR_UNIFIEDORDER}\n${e}`))
         }
     })
@@ -132,10 +135,18 @@ function notifyorder(req){
     return new Promise((resolve,reject)=>{
         try{
         // 验证签名
-        const {sign} = req
-        if(sign !== req.sign(config.mch.sign_key,'sign').sign) throw new Error(ERRORS.ERR_SIGN_VALID)
-
+        const {sign,return_msg,return_code} = req
+        if (return_msg || return_code !== 'SUCCESS' || lt_code !=='SUCCESS') {
+            debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, errmsg)
+            throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify()}`)
+        }        
+        if(sign !== req.sign(config.mch.sign_key,'sign').sign) {
+            debug(ERRORS.ERR_SIGN_VALID)
+            throw new Error(ERRORS.ERR_SIGN_VALID)
+        }
+        
         } catch(e){
+            debug(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
             reject(new Error(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`))
         }
     })
