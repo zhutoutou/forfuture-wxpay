@@ -44,7 +44,7 @@ const cdataproperties = [
     return new Promise(async (resolve,reject)=>{
         try{
             const { device_info, body, detail, attach, total_fee, spbill_create_ip,
-                goods_tag, product_id, openid} = req.body
+                goods_tag, product_id, openid} = req.query
             if([body, total_fee, spbill_create_ip].every(v=>!v)) {
                 debug(ERRORS.ERR_REQ_PARAM_MISSED)
                 throw new Error(ERRORS.ERR_REQ_PARAM_MISSED)
@@ -135,7 +135,7 @@ function notifyorder(req){
     return new Promise((resolve,reject)=>{
         try{
         // 验证签名
-        const {sign,return_msg,return_code} = req
+        const {sign,return_msg,return_code} = req.query
         if (return_msg || return_code !== 'SUCCESS' || lt_code !=='SUCCESS') {
             debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, errmsg)
             throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify()}`)
