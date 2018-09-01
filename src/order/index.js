@@ -195,6 +195,7 @@ async function unifiedorderMiddleware (ctx, next) {
         ctx.state.$orderInfo.data = result
     }
     catch(err){
+        console.log('unifiedorderMiddleware',JSON.stringify(err))
         ctx.state.$orderInfo.err = err.message
     }
     next()
