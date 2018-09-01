@@ -25,7 +25,7 @@ const { ERRORS } = require('./lib/constants')
 
  * @param {string} [必须] configs.mch                商户 配置信息
  * @param {string} [必须] configs.mch.mch_id         商户唯一标识
- * @param {string} [可选] configs.mch.orderUrl       商户下单通知网络地址
+ * @param {string} [可选] configs.mch.notify_url     商户下单通知网络地址
  * @param {string} [必须] configs.mch.fee_type       商户收款货币类型
  * @param {string} [必须] configs.mch.sign_type      加密方式
 
@@ -39,8 +39,8 @@ module.exports = function init (options) {
     const {appId,appSecret} = miniProgram
     if ([appId, appSecret].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
-    const { mch_id, fee_type, sign_key,orderUrl } = mch
-    if ([mch_id, fee_type,sign_key,orderUrl].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
+    const { mch_id, fee_type, sign_key,notify_url } = mch
+    if ([mch_id, fee_type,sign_key,notify_url].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
     if (options.mysql) {
         const { host, port, user, db, pass } = options.mysql
