@@ -187,26 +187,34 @@ function notifyorder(req){
  * Koa 授权中间件
  * 基于 unifiedorder 重新封装
  * @param {koa context} ctx koa 请求上下文
- * @return {Promise}
+ * @return {Object}
  */
 function unifiedorderMiddleware (ctx, next) {
-    return unifiedorder(ctx.req).then(result => {
-        ctx.state.$orderInfo = result
-        return next()
-    })
+    try{
+        const result = await unifiedorder(ctx.req)
+        ctx.state.$orderInfo.data = result
+    }
+    catch(err){
+        ctx.state.$orderInfo.err = err.message
+    }
+    next()
 }
 
 /**
  * Koa 授权中间件
  * 基于 notifyorder 重新封装
  * @param {koa context} ctx koa 请求上下文
- * @return {Promise}
+ * @return {Object}
  */
 function notifyorderMiddleware (ctx, next) {
-    return notifyorder(ctx.req).then(result => {
-        ctx.state.$orderInfo = result
-        return next()
-    })
+    try{
+        const result = await unifiedorder(ctx.req)
+        ctx.state.$orderInfo.data = result
+    }
+    catch(err){
+        ctx.state.$orderInfo.err = err.message
+    }
+    next()
 }
 
 module.exports = {
