@@ -189,7 +189,7 @@ function notifyorder(req){
  * @param {koa context} ctx koa 请求上下文
  * @return {Object}
  */
-function unifiedorderMiddleware (ctx, next) {
+async function unifiedorderMiddleware (ctx, next) {
     try{
         const result = await unifiedorder(ctx.req)
         ctx.state.$orderInfo.data = result
@@ -206,7 +206,7 @@ function unifiedorderMiddleware (ctx, next) {
  * @param {koa context} ctx koa 请求上下文
  * @return {Object}
  */
-function notifyorderMiddleware (ctx, next) {
+async function notifyorderMiddleware (ctx, next) {
     try{
         const result = await unifiedorder(ctx.req)
         ctx.state.$orderInfo.data = result
