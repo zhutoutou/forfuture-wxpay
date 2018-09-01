@@ -12,9 +12,9 @@ const mysql = require('./index')
 async function initOrderInfo (orderInfo) {
      try{
         const order_info = JSON.stringify(orderInfo)
-        const out_trade_no = uuidGenerator()
+        const out_trade_no = uuidGenerator().replace(/-/g, "")
         const state = ORDER_STATE.INIT
-        const open_id = orderInfo.open_id
+        const open_id = orderInfo.openid
         const init_time = moment().format('YYYY-MM-DD HH:mm:ss')
         await mysql('cOrder').insert({
             order_info,
@@ -38,8 +38,9 @@ async function initOrderInfo (orderInfo) {
  */
 async function unifiedOrderInfo(prepay_id, out_trade_no){
     try{
+        
         const res = await mysql('cOrder').count('out_trade_no as hasOrder').where({
-            out_trade_no
+            out_trade_no:out_trade_no
         })
         if(!res[0].hasOrder) throw new Error(`${ERRORS.DBERR.ERR_NO_ORDER_FOUND}\nout_trade_no:${out_trade_no}`)
         const unified_time = moment().format('YYYY-MM-DD HH:mm:ss')
@@ -49,7 +50,7 @@ async function unifiedOrderInfo(prepay_id, out_trade_no){
             state,
             unified_time
         }).where({
-            out_trade_no
+            out_trade_no:out_trade_no
         })
     } catch(e){
        debug('%s: %O', ERRORS.DBERR.ERR_WHEN_UPDATE_TO_DB, e)

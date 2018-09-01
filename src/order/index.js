@@ -1,15 +1,15 @@
 const debug = require('debug')('wxpay-sdk[unified]')
 const http = require('axios')
 const moment = require('moment')
-const {object2XML} = require('../helper/xml')
-const sign = require('../helper/sign')
+const {object2XML,xml2Object} = require('../helper/xml')
+require('../helper/sign')
 const OrderDbService = require('../mysql/OrderDbService')
 const config = require('../../config')
 const {ERRORS} = require('../constants')
 
-const cdataproperties = [
-    'detail'
-]
+// const cdataproperties = [
+//     'detail'
+// ]
 
 
 /*
@@ -71,7 +71,7 @@ signType
         try{
             const { device_info, body, detail, attach, total_fee, spbill_create_ip,
                 goods_tag, product_id, openid} = req.query
-            if([body, total_fee, spbill_create_ip].every(v=>!v)) {
+            if([body, total_fee, spbill_create_ip,openid].every(v=>!v)) {
                 debug(ERRORS.ERR_REQ_PARAM_MISSED)
                 throw new Error(ERRORS.ERR_REQ_PARAM_MISSED)
             }
@@ -89,62 +89,64 @@ signType
             const nonce_str = Math.floor(Math.random() * 10000000)
             const time_start = moment().utcOffset(8).format('YYYYMMDDHHmmss')
             const time_expire = moment().utcOffset(8).add(config.mch.mch_expire || 30, 'm').format('YYYYMMDDHHmmss')
-            
+
             // 构建统一下单参数
             const params = {
                 appid,
                 mch_id,
-                device_info,
+                // device_info,
                 nonce_str,
-                sign_type,
+                // sign_type,
                 body,
-                detail,
-                attach,
+                // detail,
+                // attach,
                 out_trade_no,
-                fee_type,
+                // fee_type,
                 total_fee,
                 spbill_create_ip,
                 time_start,
                 time_expire,
-                goods_tag,
+                // goods_tag,
                 notify_url,
                 trade_type,
-                product_id,
-                limit_pay,
+                // product_id,
+                // limit_pay,
                 openid
-            }.sign(mch.sign_key,'sign')
+            }
             // 储存订单信息
-            const out_trade_no = OrderDbService.initOrderInfo(params)
+            const out_trade_no = await OrderDbService.initOrderInfo(params)
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
-            const paramXML = object2XML(params,cdataproperties)
+            const paramXML = object2XML(params.sign(config.mch.sign_key,'sign'))
             // 统一下单接口请求
             let res = await http({
                 url: config.mch.unifiedorderUrl,
                 method: 'POST',
-                params: paramXML
+                data: paramXML
             })
-            res = res.data
+            res = await xml2Object(res.data)
+            console.log('调试5:unified请求' + JSON.stringify(res))
             if (res.return_code !== 'SUCCESS' || res.result_code !=='SUCCESS') {
                 debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, res)
                 throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(res)}`)
             }
             debug('result_code: %s', res.prepay_id)
             // 存储统一下单信息
-            OrderDbService.unifiedOrderInfo(prepay_id,out_trade_no)
+            await OrderDbService.unifiedOrderInfo(res.prepay_id,out_trade_no)
             // 构建返回值
             const result = {
-                appId,
-                timestamp:moment().format('X'),
-                nonceStr:Math.floor(Math.random() * 10000000),
+                appId:appid,
+                timeStamp:moment().format('X'),
+                nonceStr:Math.floor(Math.random() * 10000000).toString(),
                 package:`prepay_id=${res.prepay_id}`,
                 signType:sign_type,
             }
             resolve(result.sign(config.mch.sign_key,'paySign'))
             
         } catch(e){
-            debug(`${ERRORS.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
+            debug(`${ERRORS.ERR_UNIFIEDORDER}\n${JSON.stringify(e)}`)
+            console.log('ERR_UNIFIEDORDER',`${ERRORS.ERR_UNIFIEDORDER}\n${e}`)
             reject(new Error(`${ERRORS.ERR_UNIFIEDORDER}\n${e}`))
         }
     })
@@ -176,8 +178,8 @@ function notifyorder(req){
             return_msg:'OK'
         })
         } catch(e){
-            debug(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
-            reject(new Error(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`))
+            debug(`${ERRORS.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
+            reject(new Error(`${ERRORS.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`))
         }
     })
     
@@ -191,12 +193,14 @@ function notifyorder(req){
  */
 async function unifiedorderMiddleware (ctx, next) {
     try{
-        const result = await unifiedorder(ctx.req)
-        ctx.state.$orderInfo.data = result
+        const result = await unifiedorder(ctx.request)
+        ctx.state.$orderInfo = {
+            data:result
+        }
     }
     catch(err){
-        console.log('unifiedorderMiddleware',JSON.stringify(err))
-        ctx.state.$orderInfo.err = err.message
+        ctx.state.$orderInfo = {
+            err:err.message}
     }
     next()
 }
@@ -209,11 +213,15 @@ async function unifiedorderMiddleware (ctx, next) {
  */
 async function notifyorderMiddleware (ctx, next) {
     try{
-        const result = await unifiedorder(ctx.req)
-        ctx.state.$orderInfo.data = result
+        const result = await notifyorder(ctx.request)
+
+        ctx.state.$orderInfo = {
+            data:result
+        }
     }
     catch(err){
-        ctx.state.$orderInfo.err = err.message
+        ctx.state.$orderInfo = {
+            err:err.message}
     }
     next()
 }

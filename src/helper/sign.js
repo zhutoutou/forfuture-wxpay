@@ -10,11 +10,11 @@ Object.prototype.sign = function(key,signPerporty){
     let sortArr = Object.keys(this).sort()
     let stringSignTemp = ''
     sortArr.map((v)=> {
-    if(v.key != signPerporty) {
-        stringSignTemp += `${v.key}=${v.value}&` 
+    if(v != signPerporty && this[v]) {
+        stringSignTemp += `${v}=${this[v]}&` 
         }
     })
-    if(key) stringSignTemp += `&key=${key}` 
+    if(key) stringSignTemp += `key=${key}` 
     this[signPerporty] = (md5(stringSignTemp)).toUpperCase()
+    return this
 }
-
