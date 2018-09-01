@@ -144,8 +144,8 @@ signType
             resolve(result.sign(config.mch.sign_key,'paySign'))
             
         } catch(e){
-            debug(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
-            reject(new Error(`${Errors.ERR_UNIFIEDORDER}\n${e}`))
+            debug(`${ERRORS.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
+            reject(new Error(`${ERRORS.ERR_UNIFIEDORDER}\n${e}`))
         }
     })
 }
