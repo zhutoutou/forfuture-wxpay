@@ -10,8 +10,10 @@ const { ERRORS } = require('./lib/constants')
 
  * @param {object} [必须] configs.rootPathname       程序运行对应的根路径
 
- * @param {string} [可选] configs.appId              微信小程序 App ID
- * @param {string} [可选] configs.appSecret          微信小程序 App Secret
+ * @param {string} [可选] configs.miniProgram        微信小程序 配置信息
+ * @param {string} [可选] configs.miniProgram.appId  微信小程序 App ID
+ * @param {string} [可选] configs.miniProgram.appSecret          
+ *                                                   微信小程序 App Secret
 
  * @param {object} [必须] configs.mysql              MySQL 配置信息
  * @param {string} [必须] configs.mysql.host         MySQL 主机名
@@ -31,8 +33,11 @@ const { ERRORS } = require('./lib/constants')
  */
 module.exports = function init (options) {
     // 检查配置项
-    const { rootPathname , serverHost, mch} = options
+    const { rootPathname , serverHost, mch ,miniProgram} = options
     if ([rootPathname, serverHost,mch].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
+
+    const {appId,appSecret} = miniProgram
+    if ([appId, appSecret].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
     const { mch_id, fee_type, sign_key,orderUrl } = mch
     if ([mch_id, fee_type,sign_key,orderUrl].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
