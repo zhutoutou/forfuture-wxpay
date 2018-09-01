@@ -100,8 +100,8 @@ const cdataproperties = [
                 params: paramXML
             })
             res = res.data
-            if (res.return_msg || res.return_code !== 'SUCCESS' || res.result_code !=='SUCCESS') {
-                debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, res.err_code,res.err_code_des)
+            if (res.return_code !== 'SUCCESS' || res.result_code !=='SUCCESS') {
+                debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, res)
                 throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(res)}`)
             }
             debug('result_code: %s', res.prepay_id)
@@ -135,16 +135,20 @@ function notifyorder(req){
     return new Promise((resolve,reject)=>{
         try{
         // 验证签名
-        const {sign,return_msg,return_code} = req.query
-        if (return_msg || return_code !== 'SUCCESS' || lt_code !=='SUCCESS') {
-            debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, errmsg)
-            throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify()}`)
+        const {sign,return_code} = req.query
+        if (return_code !== 'SUCCESS' || lt_code !=='SUCCESS') {
+            debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, req.query)
+            throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(req.query)}`)
         }        
         if(sign !== req.sign(config.mch.sign_key,'sign').sign) {
             debug(ERRORS.ERR_SIGN_VALID)
             throw new Error(ERRORS.ERR_SIGN_VALID)
         }
-        
+        console.log('收到支付通知消息',req.query)
+        resolve({
+            return_code:'SUCCESS',
+            return_msg:'OK'
+        })
         } catch(e){
             debug(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
             reject(new Error(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`))
