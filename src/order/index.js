@@ -50,7 +50,7 @@ const cdataproperties = [
                 throw new Error(ERRORS.ERR_REQ_PARAM_MISSED)
             }
             // 一些配置项
-            const appid = config.appId
+            const appid = config.miniProgram.appId
             const mch_id = config.mch.mch_id
             const fee_type = config.mch.fee_type
             const notify_url = config.mch.notify_url
@@ -62,7 +62,7 @@ const cdataproperties = [
             // 随机数
             const nonce_str = Math.floor(Math.random() * 10000000)
             const time_start = moument().utcOffset(8).format('YYYYMMDDHHmmss')
-            const time_expire = moument().utcOffset(8).add(config.mch_expire || 30, 'm').format('YYYYMMDDHHmmss')
+            const time_expire = moument().utcOffset(8).add(config.mch.mch_expire || 30, 'm').format('YYYYMMDDHHmmss')
             
             // 构建统一下单参数
             const params = {
@@ -115,7 +115,7 @@ const cdataproperties = [
                 package:`prepay_id=${res.prepay_id}`,
                 signType:sign_type,
             }
-            resolve(result.sign(mch.sign_key,'paySign'))
+            resolve(result.sign(config.mch.sign_key,'paySign'))
             
         } catch(e){
             debug(`${Errors.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
