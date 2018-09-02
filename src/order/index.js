@@ -2,10 +2,10 @@ const debug = require('debug')('wxpay-sdk[unified]')
 const http = require('axios')
 const moment = require('moment')
 const {object2XML,xml2Object} = require('../helper/xml')
-require('../helper/sign')
+const {sign} = require('../helper/sign')
 const OrderDbService = require('../mysql/OrderDbService')
 const config = require('../../config')
-const {ERRORS} = require('../constants')
+const {ERRORS,ORDER_ORIGIN} = require('../constants')
 
 // const cdataproperties = [
 //     'detail'
@@ -65,18 +65,38 @@ signType
  * @param {String(32)}      [可选] product_id       商品ID
  * @param {String(32)}      [可选] limit_pay        指定支付方式
  * @param {String(128)}     [可选] openid           用户标识
+ * @param {Object}          [可选] scene_info       公众号专用
+ * @param {String(16)}      [必选] origin           来源 小程序还是微信公众号
  */
  function unifiedorder (req) {
     return new Promise(async (resolve,reject)=>{
         try{
+            console.log(`来自${req.ip.match(/\d+.\d+.\d+.\d+/)}的请求`)
             const { device_info, body, detail, attach, total_fee, spbill_create_ip,
                 goods_tag, product_id, openid} = req.query
+            let {origin} = req.query
             if([body, total_fee, spbill_create_ip,openid].every(v=>!v)) {
                 debug(ERRORS.ERR_REQ_PARAM_MISSED)
                 throw new Error(ERRORS.ERR_REQ_PARAM_MISSED)
             }
+            // 检测来源
+            const findRes  = ORDER_ORIGIN.find(v => v.name === origin)
+            if(!findRes) throw new Error(`${ERRORS.ERR_UNKNOW_ORIGIN}\n${origin}`)
+            origin = findRes.value
+            console.log('origin'+origin)
+            let appid = undefined
+            switch (origin) {
+                case 0:
+                    appid = config.miniProgram.appId
+                    break;
+                case 1:
+                    appid = config.platform.appId
+                break;
+                default:
+                    break;
+            }
             // 一些配置项
-            const appid = config.miniProgram.appId
+            if(!appid) throw new Error(`${ERRORS.ERR_NO_SUPPROT_ORIGIN}\n${origin}`)
             const mch_id = config.mch.mch_id
             const fee_type = config.mch.fee_type
             const notify_url = config.mch.notify_url
@@ -94,31 +114,31 @@ signType
             const params = {
                 appid,
                 mch_id,
-                // device_info,
+                device_info,
                 nonce_str,
-                // sign_type,
+                sign_type,
                 body,
-                // detail,
-                // attach,
+                detail,
+                attach,
                 out_trade_no,
-                // fee_type,
+                fee_type,
                 total_fee,
                 spbill_create_ip,
                 time_start,
                 time_expire,
-                // goods_tag,
+                goods_tag,
                 notify_url,
                 trade_type,
-                // product_id,
-                // limit_pay,
+                product_id,
+                limit_pay,
                 openid
             }
             // 储存订单信息
-            const out_trade_no = await OrderDbService.initOrderInfo(params)
+            const out_trade_no = await OrderDbService.initOrderInfo(params,origin)
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
-            const paramXML = object2XML(params.sign(config.mch.sign_key,'sign'))
+            const paramXML = object2XML(sign(params,config.mch.sign_key,'sign'))
             // 统一下单接口请求
             let res = await http({
                 url: config.mch.unifiedorderUrl,
@@ -142,7 +162,7 @@ signType
                 package:`prepay_id=${res.prepay_id}`,
                 signType:sign_type,
             }
-            resolve(result.sign(config.mch.sign_key,'paySign'))
+            resolve(sign(result,config.mch.sign_key,'paySign'))
             
         } catch(e){
             debug(`${ERRORS.ERR_UNIFIEDORDER}\n${JSON.stringify(e)}`)
