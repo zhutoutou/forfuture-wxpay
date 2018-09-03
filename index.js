@@ -1,6 +1,6 @@
 const config = require('./config')
 const debug = require('debug')('wxpay-sdk[init]')
-const { ERRORS } = require('./lib/constants')
+let { ERRORS ,ORDER_ORIGIN} = require('./lib/constants')
 
 /**
  * 初始化 qcloud sdk
@@ -33,11 +33,13 @@ const { ERRORS } = require('./lib/constants')
  */
 module.exports = function init (options) {
     // 检查配置项
-    const { rootPathname , serverHost, mch ,miniProgram} = options
+    const { rootPathname , serverHost, mch ,miniProgram,platfrom} = options
     if ([rootPathname, serverHost,mch].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
-    const {appId,appSecret} = miniProgram
-    if ([appId, appSecret].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
+    if (![miniProgram, platfrom].some(v => v !== undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
+
+    // const {appId,appSecret} = miniProgram
+    // if ([appId, appSecret].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
     const { mch_id, fee_type, sign_key,notify_url } = mch
     if ([mch_id, fee_type,sign_key,notify_url].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)

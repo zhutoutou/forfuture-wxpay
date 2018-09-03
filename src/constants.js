@@ -7,6 +7,8 @@ module.exports = {
         ERR_WHEN_INIT_MYSQL: 'ERR_WHEN_INIT_MYSQL',
 
         // 通用
+        ERR_UNKNOW_ORIGIN: 'ERR_UNKNOW_ORIGIN',
+        ERR_NO_SUPPROT_ORIGIN: 'ERR_NO_SUPPROT_ORIGIN',
         ERR_REQ_PARAM_MISSED: 'ERR_REQ_PARAM_MISSED',
         ERR_SIGN_VALID:'ERR_SIGN_VALID',
         
@@ -27,5 +29,11 @@ module.exports = {
     ORDER_STATE: {
         INIT: 0,    // 创建订单
         UNIFIED: 1  // 统一下单
-    }
+    },
+    ORDER_ORIGIN:[
+        {name:'MINIPROGRAM',
+            value:0},
+        {name:'PLATFORM',
+            value:1}
+    ]
 }
