@@ -18,9 +18,9 @@ const md5 = require('md5')
 //     this[signPerporty] = (md5(stringSignTemp)).toUpperCase()
 //     return this
 // }
-module.exports = {sign}
+module.exports = {signObject}
 
-function sign(target,key,signPerporty){
+function signObject(target,key,signPerporty){
     signPerporty = signPerporty || 'sign'
     let sortArr = Object.keys(target).sort()
     let stringSignTemp = ''
