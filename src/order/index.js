@@ -2,7 +2,7 @@ const debug = require('debug')('wxpay-sdk[unified]')
 const http = require('axios')
 const moment = require('moment')
 const {object2XML,xml2Object} = require('../helper/xml')
-const {sign} = require('../helper/sign')
+const {signObject} = require('../helper/sign')
 const OrderDbService = require('../mysql/OrderDbService')
 const config = require('../../config')
 const {ERRORS,ORDER_ORIGIN} = require('../constants')
@@ -71,8 +71,10 @@ signType
  function unifiedorder (req) {
     return new Promise(async (resolve,reject)=>{
         try{
-            console.log(`来自${req.ip.match(/\d+.\d+.\d+.\d+/)}的请求`)
-            const { device_info, body, detail, attach, total_fee, spbill_create_ip,
+            const {
+                'x-real-ip': spbill_create_ip
+            } = req.headers
+            const { device_info, body, detail, attach, total_fee,
                 goods_tag, product_id, openid} = req.query
             let {origin} = req.query
             if([body, total_fee, spbill_create_ip,openid].every(v=>!v)) {
@@ -83,7 +85,6 @@ signType
             const findRes  = ORDER_ORIGIN.find(v => v.name === origin)
             if(!findRes) throw new Error(`${ERRORS.ERR_UNKNOW_ORIGIN}\n${origin}`)
             origin = findRes.value
-            console.log('origin'+origin)
             let appid = undefined
             switch (origin) {
                 case 0:
@@ -138,7 +139,7 @@ signType
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
-            const paramXML = object2XML(sign(params,config.mch.sign_key,'sign'))
+            const paramXML = object2XML(signObject(params,config.mch.sign_key,'sign'))
             // 统一下单接口请求
             let res = await http({
                 url: config.mch.unifiedorderUrl,
@@ -146,7 +147,6 @@ signType
                 data: paramXML
             })
             res = await xml2Object(res.data)
-            console.log('调试5:unified请求' + JSON.stringify(res))
             if (res.return_code !== 'SUCCESS' || res.result_code !=='SUCCESS') {
                 debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, res)
                 throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(res)}`)
@@ -162,7 +162,7 @@ signType
                 package:`prepay_id=${res.prepay_id}`,
                 signType:sign_type,
             }
-            resolve(sign(result,config.mch.sign_key,'paySign'))
+            resolve(signObject(result,config.mch.sign_key,'paySign'))
             
         } catch(e){
             debug(`${ERRORS.ERR_UNIFIEDORDER}\n${JSON.stringify(e)}`)
@@ -182,21 +182,22 @@ signType
 function notifyorder(req){
     return new Promise((resolve,reject)=>{
         try{
+        const params = req.body
         // 验证签名
-        const {sign,return_code} = req.query
-        if (return_code !== 'SUCCESS' || lt_code !=='SUCCESS') {
+        const {return_code,result_code} = params
+        const _sign = params.sign
+        if (return_code !== 'SUCCESS' || result_code !=='SUCCESS') {
             debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, req.query)
-            throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(req.query)}`)
-        }        
-        if(sign !== req.sign(config.mch.sign_key,'sign').sign) {
+            throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(params)}`)
+        }
+        if(_sign !== signObject(params,config.mch.sign_key,'sign').sign) {
             debug(ERRORS.ERR_SIGN_VALID)
             throw new Error(ERRORS.ERR_SIGN_VALID)
         }
-        console.log('收到支付通知消息',req.query)
-        resolve({
+        resolve(object2XML({
             return_code:'SUCCESS',
             return_msg:'OK'
-        })
+        }))
         } catch(e){
             debug(`${ERRORS.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`)
             reject(new Error(`${ERRORS.ERR_NOTIFYORDE}\n${JSON.stringify(e)}`))
@@ -233,8 +234,7 @@ async function unifiedorderMiddleware (ctx, next) {
  */
 async function notifyorderMiddleware (ctx, next) {
     try{
-        const result = await notifyorder(ctx.request)
-
+        const result = await notifyorder(ctx.req)
         ctx.state.$orderInfo = {
             data:result
         }

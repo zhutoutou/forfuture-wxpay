@@ -1,4 +1,3 @@
-const js2xml = require('xml')
 const xml2js = require('xml2js')
 
 const parse = new xml2js.Parser({explicitArray:false})
