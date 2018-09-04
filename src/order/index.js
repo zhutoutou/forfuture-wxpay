@@ -1,7 +1,7 @@
 const debug = require('debug')('wxpay-sdk[unified]')
 const http = require('axios')
 const moment = require('moment')
-const {object2XML,xml2Object} = require('../helper/xml')
+const XML= require('../helper/xml')
 const {signObject} = require('../helper/sign')
 const OrderDbService = require('../mysql/OrderDbService')
 const config = require('../../config')
@@ -75,8 +75,8 @@ signType
                 'x-real-ip': spbill_create_ip
             } = req.headers
             const { device_info, body, detail, attach, total_fee,
-                goods_tag, product_id, openid} = req.query
-            let {origin} = req.query
+                goods_tag, product_id, openid} = req.body
+            let {origin} = req.body
             if([body, total_fee, spbill_create_ip,openid].every(v=>!v)) {
                 debug(ERRORS.ERR_REQ_PARAM_MISSED)
                 throw new Error(ERRORS.ERR_REQ_PARAM_MISSED)
@@ -139,14 +139,14 @@ signType
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
-            const paramXML = object2XML(signObject(params,config.mch.sign_key,'sign'))
+            const paramXML = XML.object2XML(signObject(params,config.mch.sign_key,'sign'))
             // 统一下单接口请求
             let res = await http({
                 url: config.mch.unifiedorderUrl,
                 method: 'POST',
                 data: paramXML
             })
-            res = await xml2Object(res.data)
+            res = await XML.xml2Object(res.data)
             if (res.return_code !== 'SUCCESS' || res.result_code !=='SUCCESS') {
                 debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, res)
                 throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(res)}`)
@@ -186,14 +186,14 @@ function notifyorder(req){
         // 验证签名
         const {sign,return_code,result_code} = req.body
         if (return_code !== 'SUCCESS' || result_code !=='SUCCESS') {
-            debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, req.query)
+            debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, req.body)
             throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(params)}`)
         }
-        if(_sign !== signObject(params,config.mch.sign_key,'sign').sign) {
+        if(sign !== signObject(params,config.mch.sign_key,'sign').sign) {
             debug(ERRORS.ERR_SIGN_VALID)
             throw new Error(ERRORS.ERR_SIGN_VALID)
         }
-        resolve(object2XML({
+        resolve(XML.object2XML({
             return_code:'SUCCESS',
             return_msg:'OK'
         }))
@@ -233,7 +233,7 @@ async function unifiedorderMiddleware (ctx, next) {
  */
 async function notifyorderMiddleware (ctx, next) {
     try{
-        const result = await notifyorder(ctx.req)
+        const result = await notifyorder(ctx.request)
         ctx.state.$orderInfo = {
             data:result
         }

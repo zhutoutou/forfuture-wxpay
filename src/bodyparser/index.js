@@ -76,6 +76,10 @@ module.exports = function (opts) {
   extentType(xmlTypes, extendType.xml)
 
   return function bodyParser(ctx, next) {
+    if (ctx.request.method.toUpperCase() === 'GET') {
+      ctx.request.body = ctx.request.query
+      return next()
+    }
     if (ctx.request.body !== undefined) return next();
 
     return parseBody(ctx).then(body => {
