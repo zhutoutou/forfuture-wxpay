@@ -182,10 +182,9 @@ signType
 function notifyorder(req){
     return new Promise((resolve,reject)=>{
         try{
-        const params = req.body
+
         // 验证签名
-        const {return_code,result_code} = params
-        const _sign = params.sign
+        const {sign,return_code,result_code} = req.body
         if (return_code !== 'SUCCESS' || result_code !=='SUCCESS') {
             debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, req.query)
             throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(params)}`)

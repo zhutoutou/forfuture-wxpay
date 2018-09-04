@@ -4,6 +4,8 @@ module.exports = {
         ERR_WHEN_INIT_SDK: 'ERR_WHEN_INIT_SDK',
         ERR_INIT_SDK_LOST_CONFIG: 'ERR_INIT_SDK_LOST_CONFIG',
         ERR_INIT_SDK_LOST_MYSQL_CONFIG:'ERR_INIT_SDK_LOST_MYSQL_CONFIG',
+        ERR_INIT_SDK_LOST_APP_CONFIG:'ERR_INIT_SDK_LOST_APP_CONFIG',
+        ERR_INIT_SDK_LOST_SIGNKEY_CONFIG:'ERR_INIT_SDK_LOST_SIGNKEY_CONFIG',
         ERR_WHEN_INIT_MYSQL: 'ERR_WHEN_INIT_MYSQL',
 
         // 通用
@@ -19,6 +21,7 @@ module.exports = {
         // 支付结果通知
         ERR_NOTIFYORDE:'ERR_NOTIFYORDE',
         ERR_POST_NOTIFYORDE:'ERR_POST_NOTIFYORDE',
+
         // 数据库错误
         DBERR: {
             ERR_WHEN_INSERT_TO_DB: 'ERR_WHEN_INSERT_TO_DB',
@@ -28,7 +31,8 @@ module.exports = {
     },
     ORDER_STATE: {
         INIT: 0,    // 创建订单
-        UNIFIED: 1  // 统一下单
+        UNIFIED: 1, // 统一下单
+        NOTIFY:2    // 微信确认通知
     },
     ORDER_ORIGIN:[
         {name:'MINIPROGRAM',

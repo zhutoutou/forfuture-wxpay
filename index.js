@@ -9,6 +9,8 @@ let { ERRORS ,ORDER_ORIGIN} = require('./lib/constants')
  * @param {object} [必须] configs                    配置信息
 
  * @param {object} [必须] configs.rootPathname       程序运行对应的根路径
+ * 
+ * @param {string} [必须] configs.signKey            内部消息签名密钥
 
  * @param {string} [可选] configs.miniProgram        微信小程序 配置信息
  * @param {string} [可选] configs.miniProgram.appId  微信小程序 App ID
@@ -33,10 +35,11 @@ let { ERRORS ,ORDER_ORIGIN} = require('./lib/constants')
  */
 module.exports = function init (options) {
     // 检查配置项
-    const { rootPathname , serverHost, mch ,miniProgram,platfrom} = options
+    const { rootPathname , serverHost, mch ,miniProgram,platfrom,signKey} = options
     if ([rootPathname, serverHost,mch].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
-    if (![miniProgram, platfrom].some(v => v !== undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
+    if(sign_key === undefined) throw new Error(ERRORS.ERR_INIT_SDK_LOST_SIGNKEY_CONFIG)
+    if (![miniProgram, platfrom].some(v => v !== undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_APP_CONFIG)
 
     // const {appId,appSecret} = miniProgram
     // if ([appId, appSecret].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
@@ -57,6 +60,7 @@ module.exports = function init (options) {
     return {
         config,
         mysql: require('./lib/mysql'),
-        order: require('./lib/order')
+        order: require('./lib/order'),
+        sign:require('./lib/sign')
     }
 }
