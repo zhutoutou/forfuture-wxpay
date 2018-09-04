@@ -38,7 +38,7 @@ module.exports = function init (options) {
     const { rootPathname , serverHost, mch ,miniProgram,platfrom,signKey} = options
     if ([rootPathname, serverHost,mch].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
-    if(sign_key === undefined) throw new Error(ERRORS.ERR_INIT_SDK_LOST_SIGNKEY_CONFIG)
+    if(signKey === undefined) throw new Error(ERRORS.ERR_INIT_SDK_LOST_SIGNKEY_CONFIG)
     if (![miniProgram, platfrom].some(v => v !== undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_APP_CONFIG)
 
     // const {appId,appSecret} = miniProgram
