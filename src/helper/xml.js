@@ -8,7 +8,7 @@ const builder = new xml2js.Builder({cdata :true});
  * @returns {String}
  */
 function object2XML (target) {
-    return builder.buildObject(target,);
+    return builder.buildObject(target);
 }
 
 /**

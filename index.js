@@ -61,6 +61,7 @@ module.exports = function init (options) {
         config,
         mysql: require('./lib/mysql'),
         order: require('./lib/order'),
-        sign:require('./lib/sign')
+        sign:require('./lib/sign'),
+        bodyparser:require('./lib/bodyparser')
     }
 }
