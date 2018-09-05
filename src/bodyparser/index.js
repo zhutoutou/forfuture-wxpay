@@ -29,10 +29,11 @@ module.exports = function (opts) {
   const detectJSON = opts.detectJSON;
   const onerror = opts.onerror || throwError;
 
-  const enableTypes = opts.enableTypes || ['json', 'form'];
+  const enableTypes = opts.enableTypes || ['json', 'form','xml'];
   const enableForm = checkEnable(enableTypes, 'form');
   const enableJson = checkEnable(enableTypes, 'json');
   const enableText = checkEnable(enableTypes, 'text');
+  const enableXML = checkEnable(enableTypes, 'xml');
 
   opts.detectJSON = undefined;
   opts.onerror = undefined;
@@ -96,14 +97,11 @@ module.exports = function (opts) {
       return parse.form(ctx, formOpts);
     }
     if (enableText && ctx.request.is(textTypes)) {
-      console.log('text格式')
       return parse.text(ctx, textOpts) || '';
     }
-    if(enableText && ctx.request.is(xmlTypes)){
-      console.log('xml格式')
+    if(enableXML && ctx.request.is(xmlTypes)){
       return parse.xml(ctx,xmlOpts)
     }
-    console.log('其他格式')
     return Promise.resolve({});
   }
 };

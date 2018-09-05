@@ -121,7 +121,6 @@ signType
                 body,
                 detail,
                 attach,
-                out_trade_no,
                 fee_type,
                 total_fee,
                 spbill_create_ip,
@@ -182,14 +181,13 @@ signType
 function notifyorder(req){
     return new Promise((resolve,reject)=>{
         try{
-
         // 验证签名
         const {sign,return_code,result_code} = req.body
         if (return_code !== 'SUCCESS' || result_code !=='SUCCESS') {
             debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, req.body)
-            throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(params)}`)
+            throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(req.body)}`)
         }
-        if(sign !== signObject(params,config.mch.sign_key,'sign').sign) {
+        if(sign !== signObject(req.body,config.mch.sign_key,'sign').sign) {
             debug(ERRORS.ERR_SIGN_VALID)
             throw new Error(ERRORS.ERR_SIGN_VALID)
         }
