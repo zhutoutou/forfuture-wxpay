@@ -60,6 +60,25 @@ async function unifiedOrderInfo(prepay_id, out_trade_no){
 }
 
 /**
+ * 查找来源信息
+ * @param {string} out_trade_no 
+ * @return {void}
+ */
+async function findOriginInfo(out_trade_no){
+    try{
+        const findRes = await mysql('cOrder').select('cOrder.origin').where(
+            {out_trade_no}
+        ).first()
+        if(!findRes) throw new Error(`${ERRORS.DBERR.ERR_NO_ORDER_FOUND}\nout_trade_no:${out_trade_no}`)
+        const {origin} = findRes
+        return origin
+    } catch(e){
+       debug('%s: %O', ERRORS.DBERR.ERR_WHEN_SELECT_TO_DB, e)
+       throw new Error(`${ERRORS.DBERR.ERR_WHEN_SELECT_TO_DB}\n${e}`)
+    }
+}
+
+/**
  * 更新订单信息
  * @param {string} prepay_id 
  * @param {string} out_trade_no 
@@ -73,9 +92,8 @@ async function notifyOrderInfo(out_trade_no){
         )
         if(!res[0].hasOrder) throw new Error(`${ERRORS.DBERR.ERR_NO_ORDER_FOUND}\nout_trade_no:${out_trade_no}`)
         const notify_time = moment().format('YYYY-MM-DD HH:mm:ss')
-        const state = ORDER_STATE.N
+        const state = ORDER_STATE.NOTIFY
         await mysql('cOrder').update({
-            prepay_id,
             state,
             notify_time
         }).where(
@@ -90,5 +108,6 @@ async function notifyOrderInfo(out_trade_no){
 module.exports = {
     initOrderInfo,
     unifiedOrderInfo,
-    notifyOrderInfo
+    notifyOrderInfo,
+    findOriginInfo
 }

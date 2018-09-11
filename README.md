@@ -16,12 +16,14 @@ forfuture 服务端SDK是自己封装的微信支付的快速开发库提供以�
 
 ```javascript
 const configs = {
-  appId: 'wx00dd00dd00dd00dd',
-  appSecret: 'abcdefghijkl',
-  mch: {
-    mch_id: 'mch00dd00dd00dd00dd',
-    fee_type: 'CNY',
-    sign_type: 'md5'
+  platform:{
+    appId: 'wx00dd00dd00dd00dd',
+    appSecret: 'abcdefghijkl',
+    mch: {
+      mch_id: 'mch00dd00dd00dd00dd',
+      fee_type: 'CNY',
+      sign_type: 'md5'
+    }
   }
 }
 const forfuture-wxpay = require('forfuture-wxpay')(configs)

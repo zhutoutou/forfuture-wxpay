@@ -85,23 +85,15 @@ signType
             const findRes  = ORDER_ORIGIN.find(v => v.name === origin)
             if(!findRes) throw new Error(`${ERRORS.ERR_UNKNOW_ORIGIN}\n${origin}`)
             origin = findRes.value
-            let appid = undefined
-            switch (origin) {
-                case 0:
-                    appid = config.miniProgram.appId
-                    break;
-                case 1:
-                    appid = config.platform.appId
-                break;
-                default:
-                    break;
-            }
+            const conf = originConfig(origin)
+            if(!conf || [conf.appid,conf.mch].some(v=>!v)) throw new Error(`${ERRORS.ERR_NO_SUPPROT_ORIGIN}\n${origin}`)
             // 一些配置项
-            if(!appid) throw new Error(`${ERRORS.ERR_NO_SUPPROT_ORIGIN}\n${origin}`)
-            const mch_id = config.mch.mch_id
-            const fee_type = config.mch.fee_type
-            const notify_url = config.mch.notify_url
-            const limit_pay = config.mch.limit_pay
+            const appid = conf.appid
+            const mch = conf.mch
+            const mch_id = mch.mch_id
+            const fee_type = mch.fee_type
+            const notify_url = mch.notify_url
+            const limit_pay = mch.limit_pay
             // 默认值
             const sign_type = 'MD5'
             const trade_type = 'JSAPI'
@@ -109,7 +101,7 @@ signType
             // 随机数
             const nonce_str = Math.floor(Math.random() * 10000000)
             const time_start = moment().utcOffset(8).format('YYYYMMDDHHmmss')
-            const time_expire = moment().utcOffset(8).add(config.mch.mch_expire || 30, 'm').format('YYYYMMDDHHmmss')
+            const time_expire = moment().utcOffset(8).add(mch.mch_expire || 30, 'm').format('YYYYMMDDHHmmss')
 
             // 构建统一下单参数
             const params = {
@@ -138,10 +130,10 @@ signType
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
-            const paramXML = XML.object2XML(signObject(params,config.mch.sign_key,'sign'))
+            const paramXML = XML.object2XML(signObject(params,mch.sign_key,'sign'))
             // 统一下单接口请求
             let res = await http({
-                url: config.mch.unifiedorderUrl,
+                url: mch.unifiedorderUrl,
                 method: 'POST',
                 data: paramXML
             })
@@ -161,7 +153,7 @@ signType
                 package:`prepay_id=${res.prepay_id}`,
                 signType:sign_type,
             }
-            resolve(signObject(result,config.mch.sign_key,'paySign'))
+            resolve(signObject(result,mch.sign_key,'paySign'))
             
         } catch(e){
             debug(`${ERRORS.ERR_UNIFIEDORDER}\n${JSON.stringify(e)}`)
@@ -187,10 +179,16 @@ function notifyorder(req){
             debug('%s: %O', ERRORS.ERR_POST_UNIFIEDOREDER, req.body)
             throw new Error(`${ERRORS.ERR_POST_UNIFIEDOREDER}\n${JSON.stringify(req.body)}`)
         }
-        if(sign !== signObject(req.body,config.mch.sign_key,'sign').sign) {
+        const {out_trade_no} = req.body
+        const origin = await OrderDbService.findOriginInfo(out_trade_no)
+        const conf = originConfig(origin)
+        if(!conf || [conf.appid,conf.mch].some(v=>!v)) throw new Error(`${ERRORS.ERR_NO_SUPPROT_ORIGIN}\n${origin}`)
+        const mch = conf.mch
+        if(sign !== signObject(req.body,mch.sign_key,'sign').sign) {
             debug(ERRORS.ERR_SIGN_VALID)
             throw new Error(ERRORS.ERR_SIGN_VALID)
         }
+        await OrderDbService.notifyOrderInfo(out_trade_no)
         resolve(XML.object2XML({
             return_code:'SUCCESS',
             return_msg:'OK'
@@ -241,6 +239,24 @@ async function notifyorderMiddleware (ctx, next) {
             err:err.message}
     }
     next()
+}
+
+
+function originConfig(origin){
+    switch (origin) {
+        case 0:
+            return {
+            appid: config.miniProgram.appId,
+            mch : config.miniProgram.mch,
+            origin}
+        case 1:
+            return {
+            appid : config.platform.appId,
+            mch : config.platform.mch,
+            origin}
+        default:
+            return undefined
+    }
 }
 
 module.exports = {
