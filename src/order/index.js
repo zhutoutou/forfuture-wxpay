@@ -171,7 +171,7 @@ signType
  * unifiedorder(this.req).then(orderinfo => { // ...some code })
  */
 function notifyorder(req){
-    return new Promise((resolve,reject)=>{
+    return new Promise(async(resolve,reject)=>{
         try{
         // 验证签名
         const {sign,return_code,result_code} = req.body
