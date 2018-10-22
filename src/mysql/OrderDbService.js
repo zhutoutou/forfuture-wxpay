@@ -9,7 +9,7 @@ const mysql = require('./index')
  * @param {object} orderInfo 
  * @return {string}
  */
-async function initOrderInfo (orderInfo,origin) {
+async function initOrderInfo (orderInfo,origin,unionId) {
      try{
         const order_info = JSON.stringify(orderInfo)
         const out_trade_no = uuidGenerator().replace(/-/g, "")
@@ -22,7 +22,8 @@ async function initOrderInfo (orderInfo,origin) {
             open_id, 
             state, 
             init_time,
-            origin
+            origin,
+            unionId
         })
         return out_trade_no
      } catch(e){

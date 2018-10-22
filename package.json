@@ -1,6 +1,6 @@
 {
   "name": "forfuture-wxpay",
-  "version": "1.0.19",
+  "version": "1.0.28",
   "description": "微信支付接口实现",
   "repository": {
     "type": "git",

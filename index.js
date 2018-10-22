@@ -35,7 +35,7 @@ let { ERRORS ,ORDER_ORIGIN} = require('./lib/constants')
 module.exports = function init (options) {
     // 检查配置项
     const { rootPathname , serverHost ,miniProgram,platfrom,signKey} = options
-    if ([rootPathname, serverHostch].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
+    if ([rootPathname, serverHost].some(v => v === undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_CONFIG)
 
     if(signKey === undefined) throw new Error(ERRORS.ERR_INIT_SDK_LOST_SIGNKEY_CONFIG)
     if (![miniProgram, platfrom].some(v => v !== undefined)) throw new Error(ERRORS.ERR_INIT_SDK_LOST_APP_CONFIG)
@@ -61,6 +61,6 @@ module.exports = function init (options) {
         mysql: require('./lib/mysql'),
         order: require('./lib/order'),
         sign:require('./lib/sign'),
-        bodyParser:require('./lib/bodyParser')
+        bodyParser:require('./lib/bodyparser')
     }
 }

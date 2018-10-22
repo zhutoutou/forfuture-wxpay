@@ -67,6 +67,7 @@ signType
  * @param {String(128)}     [可选] openid           用户标识
  * @param {Object}          [可选] scene_info       公众号专用
  * @param {String(16)}      [必选] origin           来源 小程序还是微信公众号
+ * @param {String{100}}     [可选] unionId          唯一标识
  */
  function unifiedorder (req) {
     return new Promise(async (resolve,reject)=>{
@@ -75,7 +76,7 @@ signType
                 'x-real-ip': spbill_create_ip
             } = req.headers
             const { device_info, body, detail, attach, total_fee,
-                goods_tag, product_id, openid} = req.body
+                goods_tag, product_id, openid ,unionid} = req.body
             let {origin} = req.body
             if([body, total_fee, spbill_create_ip,openid].every(v=>!v)) {
                 debug(ERRORS.ERR_REQ_PARAM_MISSED)
@@ -126,7 +127,7 @@ signType
                 openid
             }
             // 储存订单信息
-            const out_trade_no = await OrderDbService.initOrderInfo(params,origin)
+            const out_trade_no = await OrderDbService.initOrderInfo(params,origin,unionid)
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
