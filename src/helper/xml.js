@@ -1,7 +1,7 @@
 const xml2js = require('xml2js')
 
 const parse = new xml2js.Parser({explicitArray:false})
-const builder = new xml2js.Builder({cdata :true});
+const builder = new xml2js.Builder({rootName: 'xml', headless: true, cdata: true})
 /**
  * XML序列化
  * @param {Object}          [必填] target          目标对象
