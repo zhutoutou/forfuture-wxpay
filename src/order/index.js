@@ -76,7 +76,7 @@ signType
                 'x-real-ip': spbill_create_ip
             } = req.headers
             const { device_info, body, detail, attach, total_fee,
-                goods_tag, product_id, openid ,unionid} = req.body
+                goods_tag, product_id, openid ,unionId} = req.body
             let {origin} = req.body
             if([body, total_fee, spbill_create_ip,openid].every(v=>!v)) {
                 debug(ERRORS.ERR_REQ_PARAM_MISSED)
@@ -127,7 +127,7 @@ signType
                 openid
             }
             // 储存订单信息
-            const out_trade_no = await OrderDbService.initOrderInfo(params,origin,unionid)
+            const out_trade_no = await OrderDbService.initOrderInfo(params,origin,unionId)
             params.out_trade_no = out_trade_no
             debug('out_trade_no:%s',out_trade_no)
             // XML生成
