@@ -4,22 +4,41 @@ module.exports = {
         ERR_WHEN_INIT_SDK: 'ERR_WHEN_INIT_SDK',
         ERR_INIT_SDK_LOST_CONFIG: 'ERR_INIT_SDK_LOST_CONFIG',
         ERR_INIT_SDK_LOST_MYSQL_CONFIG:'ERR_INIT_SDK_LOST_MYSQL_CONFIG',
+        ERR_INIT_SDK_LOST_APP_CONFIG:'ERR_INIT_SDK_LOST_APP_CONFIG',
+        ERR_INIT_SDK_LOST_SIGNKEY_CONFIG:'ERR_INIT_SDK_LOST_SIGNKEY_CONFIG',
         ERR_WHEN_INIT_MYSQL: 'ERR_WHEN_INIT_MYSQL',
 
+        // 通用
+        ERR_UNKNOW_ORIGIN: 'ERR_UNKNOW_ORIGIN',
+        ERR_NO_SUPPROT_ORIGIN: 'ERR_NO_SUPPROT_ORIGIN',
+        ERR_REQ_PARAM_MISSED: 'ERR_REQ_PARAM_MISSED',
+        ERR_SIGN_VALID:'ERR_SIGN_VALID',
+        
         // 统一下单模块
         ERR_UNIFIEDORDER: 'ERR_UNIFIEDORDER',
-        ERR_REQ_PARAM_MISSED: 'ERR_REQ_PARAM_MISSED',
-        ERR_GET_UNIFIEDOREDER:'ERR_GET_UNIFIEDOREDER',
+        ERR_POST_UNIFIEDOREDER:'ERR_POST_UNIFIEDOREDER',
+
+        // 支付结果通知
+        ERR_NOTIFYORDE:'ERR_NOTIFYORDE',
+        ERR_POST_NOTIFYORDE:'ERR_POST_NOTIFYORDE',
 
         // 数据库错误
         DBERR: {
             ERR_WHEN_INSERT_TO_DB: 'ERR_WHEN_INSERT_TO_DB',
             ERR_WHEN_UPDATE_TO_DB: 'ERR_WHEN_UPDATE_TO_DB',
+            ERR_WHEN_SELECT_TO_DB: 'ERR_WHEN_SELECT_TO_DB',
             ERR_NO_ORDER_FOUND:'ERR_NO_ORDER_FOUND'
         }
     },
     ORDER_STATE: {
         INIT: 0,    // 创建订单
-        UNIFIED: 1  // 统一下单
-    }
+        UNIFIED: 1, // 统一下单
+        NOTIFY:2    // 微信确认通知
+    },
+    ORDER_ORIGIN:[
+        {name:'MINIPROGRAM',
+            value:0},
+        {name:'PLATFORM',
+            value:1}
+    ]
 }

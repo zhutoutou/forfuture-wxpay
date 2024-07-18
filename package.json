@@ -1,7 +1,11 @@
 {
   "name": "forfuture-wxpay",
-  "version": "1.0.1",
+  "version": "1.0.29",
   "description": "微信支付接口实现",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhutoutou/forfuture-wxpay.git"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -21,10 +25,16 @@
     "md5": "^2.2.1",
     "moment": "^2.22.2",
     "uuid": "^3.3.2",
-    "xml": "^1.0.1"
+    "xml": "^1.0.1",
+    "xml2js": "^0.4.19",
+    "inflation": "~2.0.0",
+    "qs": "~4.0.0",
+    "raw-body": "~2.1.2",
+    "type-is": "~1.6.6"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "rimraf": "^2.6.2"
   }

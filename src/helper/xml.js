@@ -1,24 +1,44 @@
-const xml = require('xml')
+const xml2js = require('xml2js')
 
+const parse = new xml2js.Parser({explicitArray:false})
+const builder = new xml2js.Builder({rootName: 'xml', headless: true, cdata: true})
 /**
  * XML序列化
  * @param {Object}          [必填] target          目标对象
- * @param {Array}           [必填] properties      需要设置CData的属性
+ * @returns {String}
  */
-function object2XML (target, properties) {
-    if (properties) {
-        properties.forEach(v => {
-            if (target[v]) {
-                const val = target[v]
-                target[v] = {
-                    _cdata: val
-                }
-            }
-        })
+function object2XML (target) {
+    return builder.buildObject(target);
+}
+
+/**
+ * XML反序列化
+ * @param {String}          [必填] target            目标对象
+ * @returns {Object} 
+ */
+async function xml2Object(target){
+    let res = ''
+    try{
+     res = await xml2jsSync(target)
     }
-    return xml(target)
+    catch(err){
+        console.log('xml2Objecterr' + JSON.stringify(err))
+    }
+    return res
+}
+
+function xml2jsSync (target){
+    return new Promise((resolve,reject)=>{
+        parse.parseString(target,(err,res)=>{
+            if(res) resolve(res.xml)
+            else reject(err)
+    
+        })
+    })
 }
 
 module.exports = {
-    object2XML
+    object2XML,
+    xml2Object
 }
+
